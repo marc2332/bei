@@ -128,11 +128,13 @@ impl fmt::Write for Writer {
 
 pub fn init() {}
 
+/// Print to stdout.
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga::_print(format_args!($($arg)*)));
 }
 
+/// Print to stdout in a new line.
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));

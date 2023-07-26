@@ -16,9 +16,9 @@ fn panic(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     vga::init();
 
-    println!("Helloooo");
+    println!("Booting bei.");
 
-    panic!("test");
-
+    #[allow(unreachable_code)]
+    #[allow(clippy::empty_loop)]
     loop {}
 }
