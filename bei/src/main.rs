@@ -17,7 +17,7 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_bei();
 
-    println!("Booting bei.");
+    println!("[Success] Started bei.");
 
     #[allow(unreachable_code)]
     #[allow(clippy::empty_loop)]

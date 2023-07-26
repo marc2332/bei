@@ -8,6 +8,7 @@ bootloader = "0.9.23"
 volatile = "0.2.6"
 spin = "0.5.2"
 x86_64 = "0.14.10"
+uart_16550 = "0.2.19"
 
 [dependencies.lazy_static]
 version = "1.0"

@@ -13,6 +13,8 @@ lazy_static! {
 
 pub fn init_idt() {
     IDT.load();
+
+    println!("[Success] Started Interrupts module.")
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
