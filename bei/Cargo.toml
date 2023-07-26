@@ -1,0 +1,13 @@
+[package]
+name = "bei"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bei-kernel = { path = "../kernel" }
+x86_64 = "0.14.10"
+bootloader = "0.9.23"
+lazy_static = "1.4.0"
+
+[package.metadata.bootimage]
+test-success-exit-code = 33         # (0x10 << 1) | 1
