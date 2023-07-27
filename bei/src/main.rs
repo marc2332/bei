@@ -7,11 +7,12 @@
 
 #[cfg(test)]
 mod tests;
-use bei_kernel::{interrupts, println, vga};
+use bei_kernel::{gdt, hlt_loop, interrupts, println, vga};
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     vga::init();
+    gdt::init();
     interrupts::init_idt();
 
     #[cfg(test)]
@@ -19,7 +20,5 @@ pub extern "C" fn _start() -> ! {
 
     println!("[Success] Started bei.");
 
-    #[allow(unreachable_code)]
-    #[allow(clippy::empty_loop)]
-    loop {}
+    hlt_loop()
 }

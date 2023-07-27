@@ -4,22 +4,22 @@ use core::panic::PanicInfo;
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    use crate::println;
+    use crate::{hlt_loop, println};
 
     println!("{}", info);
-    loop {}
+    hlt_loop()
 }
 
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     use crate::{
-        serial_println,
+        hlt_loop, serial_println,
         test_runner::{exit_qemu, QemuExitCode},
     };
 
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {}
+    hlt_loop()
 }
