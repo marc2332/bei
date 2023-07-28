@@ -1,7 +1,9 @@
 #![feature(abi_x86_interrupt)]
 #![no_std]
+#![feature(const_mut_refs)]
 
 pub mod allocator;
+pub mod fixed_size_block;
 pub mod gdt;
 pub mod interrupts;
 pub mod memory;
