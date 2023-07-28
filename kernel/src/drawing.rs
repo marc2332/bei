@@ -5,6 +5,7 @@ use core::{
 
 use alloc::vec::Vec;
 use futures_util::{task::AtomicWaker, Stream, StreamExt};
+use hashbrown::HashMap;
 use lazy_static::lazy_static;
 use spin::Mutex;
 use vga::{
@@ -14,12 +15,17 @@ use vga::{
 };
 
 lazy_static! {
-    pub static ref DRAWING_QUEUE: Mutex<Vec<DrawTask>> = Mutex::default();
+    pub static ref DRAWING_QUEUE: Mutex<HashMap<usize, Vec<DrawTask>>> = Mutex::default();
     pub static ref DRAWING_CHANGED: Mutex<bool> = Mutex::default();
 }
 
-pub fn add_draw_task(task: DrawTask) {
-    DRAWING_QUEUE.lock().push(task);
+pub fn add_draw_task(id: usize, task: DrawTask) {
+    DRAWING_QUEUE.lock().entry(id).or_default().push(task);
+    *DRAWING_CHANGED.lock() = true;
+}
+
+pub fn remove_tasks(id: usize) {
+    DRAWING_QUEUE.lock().remove(&id);
     *DRAWING_CHANGED.lock() = true;
 }
 
@@ -32,8 +38,13 @@ static DRAWING_WAKER: AtomicWaker = AtomicWaker::new();
 #[derive(Clone)]
 pub enum DrawTask {
     DrawLine {
-        x: Point<isize>,
-        y: Point<isize>,
+        start: Point<isize>,
+        end: Point<isize>,
+        color: Color16,
+    },
+    DrawRect {
+        start: Point<isize>,
+        end: Point<isize>,
         color: Color16,
     },
     DrawText {},
@@ -44,17 +55,24 @@ pub async fn draw_and_paint() {
 
     let mode = Graphics640x480x16::new();
     mode.set_mode();
-    mode.clear_screen(Color16::White);
+    mode.clear_screen(Color16::Black);
 
     while waiter.next().await.is_some() {
-        mode.clear_screen(Color16::White);
+        mode.clear_screen(Color16::Black);
         let queue = DRAWING_QUEUE.lock().clone();
-        for task in queue {
-            match task {
-                DrawTask::DrawLine { x, y, color } => {
-                    mode.draw_line(x, y, color);
+        for tasks in queue.into_values() {
+            for task in tasks {
+                match task {
+                    DrawTask::DrawLine { start, end, color } => {
+                        mode.draw_line(start, end, color);
+                    }
+                    DrawTask::DrawRect { start, end, color } => {
+                        for y_i in start.1..end.1 {
+                            mode.draw_line((start.0, y_i), (end.0, y_i), color);
+                        }
+                    }
+                    DrawTask::DrawText {} => {}
                 }
-                DrawTask::DrawText {} => {}
             }
         }
         *DRAWING_CHANGED.lock() = false;

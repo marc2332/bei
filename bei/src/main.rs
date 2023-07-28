@@ -43,11 +43,23 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     println!("[Success] Started bei.");
 
-    add_draw_task(DrawTask::DrawLine {
-        x: (50, 50),
-        y: (100, 100),
-        color: Color16::Blue,
-    });
+    add_draw_task(
+        0,
+        DrawTask::DrawRect {
+            start: (50, 50),
+            end: (100, 100),
+            color: Color16::LightGrey,
+        },
+    );
+
+    add_draw_task(
+        0,
+        DrawTask::DrawRect {
+            start: (110, 50),
+            end: (160, 100),
+            color: Color16::LightGrey,
+        },
+    );
 
     let mut executor = Executor::new();
     executor.spawn(Task::new(keyboard::print_keypresses()));
