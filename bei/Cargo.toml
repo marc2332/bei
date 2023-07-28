@@ -8,6 +8,7 @@ bei-kernel = { path = "../kernel" }
 x86_64 = "0.14.10"
 bootloader = { version = "0.9.23", features = ["map_physical_memory"]}
 lazy_static = "1.4.0"
+vga = "0.2.9"
 
 [package.metadata.bootimage]
 test-args = [

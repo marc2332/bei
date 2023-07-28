@@ -3,6 +3,7 @@
 #![feature(const_mut_refs)]
 
 pub mod allocator;
+pub mod drawing;
 pub mod executor;
 pub mod fixed_size_block;
 pub mod gdt;

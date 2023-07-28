@@ -10,21 +10,22 @@ mod tests;
 extern crate alloc;
 use bei_kernel::{
     allocator,
+    drawing::{add_draw_task, draw_and_paint, DrawTask},
     executor::Executor,
     gdt, interrupts, keyboard,
     memory::{self, BootInfoFrameAllocator},
     println,
     task::Task,
-    vga,
 };
 
 use bootloader::{entry_point, BootInfo};
+use vga::colors::Color16;
 use x86_64::VirtAddr;
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    vga::init();
+    bei_kernel::vga::init();
     gdt::init();
     interrupts::init_idt();
 
@@ -42,7 +43,14 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     println!("[Success] Started bei.");
 
+    add_draw_task(DrawTask::DrawLine {
+        x: (50, 50),
+        y: (100, 100),
+        color: Color16::Blue,
+    });
+
     let mut executor = Executor::new();
     executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.spawn(Task::new(draw_and_paint()));
     executor.run();
 }
