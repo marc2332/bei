@@ -7,13 +7,27 @@
 
 #[cfg(test)]
 mod tests;
-use bei_kernel::{gdt, hlt_loop, interrupts, println, vga};
+extern crate alloc;
+use bei_kernel::{
+    allocator, gdt, hlt_loop, interrupts,
+    memory::{self, BootInfoFrameAllocator},
+    println, vga,
+};
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+use bootloader::{entry_point, BootInfo};
+use x86_64::VirtAddr;
+
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
     vga::init();
     gdt::init();
     interrupts::init_idt();
+
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
     #[cfg(test)]
     test_bei();
