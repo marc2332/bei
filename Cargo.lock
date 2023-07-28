@@ -31,7 +31,9 @@ version = "0.1.0"
 dependencies = [
  "bei-kernel",
  "bootloader",
+ "hashbrown",
  "lazy_static",
+ "spin",
  "vga",
  "x86_64",
 ]

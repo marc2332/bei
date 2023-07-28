@@ -8,18 +8,23 @@
 #[cfg(test)]
 mod tests;
 extern crate alloc;
+
+use alloc::{string::ToString, sync::Arc};
 use bei_kernel::{
     allocator,
-    drawing::{add_draw_task, draw_and_paint, DrawTask},
+    drawing::draw_and_paint,
     executor::Executor,
-    gdt, interrupts, keyboard,
+    gdt, interrupts,
+    keyboard::detect_keypresses,
     memory::{self, BootInfoFrameAllocator},
     println,
     task::Task,
+    windowing::{Window, WindowManager},
 };
 
 use bootloader::{entry_point, BootInfo};
-use vga::colors::Color16;
+use hashbrown::HashMap;
+use spin::Mutex;
 use x86_64::VirtAddr;
 
 entry_point!(kernel_main);
@@ -43,26 +48,32 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     println!("[Success] Started bei.");
 
-    add_draw_task(
-        0,
-        DrawTask::DrawRect {
-            start: (50, 50),
-            end: (100, 100),
-            color: Color16::LightGrey,
-        },
+    let window_manager = WindowManager::new(
+        Some(0),
+        HashMap::from([
+            (
+                0,
+                Window::new(0, "Bei Window".to_string(), (100, 100), true, (50, 50)),
+            ),
+            (
+                1,
+                Window::new(
+                    1,
+                    "Another window".to_string(),
+                    (150, 100),
+                    false,
+                    (170, 50),
+                ),
+            ),
+        ]),
     );
 
-    add_draw_task(
-        0,
-        DrawTask::DrawRect {
-            start: (110, 50),
-            end: (160, 100),
-            color: Color16::LightGrey,
-        },
-    );
+    window_manager.draw();
+
+    let window_manager = Arc::new(Mutex::new(window_manager));
 
     let mut executor = Executor::new();
-    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.spawn(Task::new(detect_keypresses(window_manager)));
     executor.spawn(Task::new(draw_and_paint()));
     executor.run();
 }

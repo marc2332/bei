@@ -15,6 +15,7 @@ pub mod serial;
 pub mod task;
 pub mod test_runner;
 pub mod vga;
+pub mod windowing;
 extern crate alloc;
 
 pub fn hlt_loop() -> ! {
