@@ -9,9 +9,13 @@
 mod tests;
 extern crate alloc;
 use bei_kernel::{
-    allocator, gdt, hlt_loop, interrupts,
+    allocator,
+    executor::Executor,
+    gdt, interrupts, keyboard,
     memory::{self, BootInfoFrameAllocator},
-    println, vga,
+    println,
+    task::Task,
+    vga,
 };
 
 use bootloader::{entry_point, BootInfo};
@@ -38,5 +42,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     println!("[Success] Started bei.");
 
-    hlt_loop()
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
 }
