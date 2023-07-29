@@ -3,7 +3,7 @@ use core::{
     task::{Context, Poll},
 };
 
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 use futures_util::{task::AtomicWaker, Stream, StreamExt};
 use hashbrown::HashMap;
 use lazy_static::lazy_static;
@@ -47,7 +47,11 @@ pub enum DrawTask {
         end: Point<isize>,
         color: Color16,
     },
-    DrawText {},
+    DrawText {
+        location: Point<usize>,
+        text: String,
+        color: Color16,
+    },
 }
 
 pub async fn draw_and_paint() {
@@ -71,7 +75,20 @@ pub async fn draw_and_paint() {
                             mode.draw_line((start.0, y_i), (end.0, y_i), color);
                         }
                     }
-                    DrawTask::DrawText {} => {}
+                    DrawTask::DrawText {
+                        location,
+                        text,
+                        color,
+                    } => {
+                        for (offset, character) in text.chars().enumerate() {
+                            mode.draw_character(
+                                location.0 + offset * 8,
+                                location.1,
+                                character,
+                                color,
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -1,4 +1,4 @@
-use alloc::string::String;
+use alloc::{format, string::String};
 use hashbrown::HashMap;
 use vga::{colors::Color16, drawing::Point};
 
@@ -31,15 +31,14 @@ impl Window {
     }
 
     pub fn draw(&self) {
-        let top_left = self.position;
-        let top_right = (self.position.0 + self.size.0 as isize, self.position.1);
-        let bottom_right = (
-            self.position.0 + self.size.0 as isize,
-            self.position.1 + self.size.1 as isize,
-        );
-        let bottom_left = (self.position.0, self.position.1 + self.size.1 as isize);
         remove_tasks(self.id);
-        add_draw_task(self.id, DrawTask::DrawText {});
+
+        let (color, status) = if self.is_active {
+            (Color16::LightCyan, "(Active Window)")
+        } else {
+            (Color16::LightBlue, "")
+        };
+
         add_draw_task(
             self.id,
             DrawTask::DrawRect {
@@ -48,43 +47,18 @@ impl Window {
                     self.position.0 + self.size.0 as isize,
                     self.position.1 + self.size.1 as isize,
                 ),
-                color: Color16::LightCyan,
+                color,
             },
         );
-        if self.is_active {
-            add_draw_task(
-                self.id,
-                DrawTask::DrawLine {
-                    start: top_left,
-                    end: top_right,
-                    color: Color16::LightBlue,
-                },
-            );
-            add_draw_task(
-                self.id,
-                DrawTask::DrawLine {
-                    start: top_left,
-                    end: bottom_left,
-                    color: Color16::LightBlue,
-                },
-            );
-            add_draw_task(
-                self.id,
-                DrawTask::DrawLine {
-                    start: top_right,
-                    end: bottom_right,
-                    color: Color16::LightBlue,
-                },
-            );
-            add_draw_task(
-                self.id,
-                DrawTask::DrawLine {
-                    start: bottom_left,
-                    end: bottom_right,
-                    color: Color16::LightBlue,
-                },
-            );
-        }
+
+        add_draw_task(
+            self.id,
+            DrawTask::DrawText {
+                location: (self.position.0 as usize + 5, self.position.1 as usize + 5),
+                text: format!("{} {}", self.title, status),
+                color: Color16::Black,
+            },
+        );
     }
 }
 
@@ -102,10 +76,19 @@ impl WindowManager {
     }
 
     pub fn focus_next_window(&mut self) {
-        if self.active_window == Some(1) {
-            self.set_active(Some(0));
-        } else {
-            self.set_active(Some(1));
+        let window = self.windows.iter().enumerate().find_map(|(i, w)| {
+            if Some(*w.0) == self.active_window {
+                Some(i)
+            } else {
+                None
+            }
+        });
+        if let Some(window) = window {
+            if window == self.windows.len() - 1 {
+                self.set_active(self.windows.values().nth(0).map(|w| w.id));
+            } else {
+                self.set_active(self.windows.values().nth(window + 1).map(|w| w.id));
+            }
         }
     }
 

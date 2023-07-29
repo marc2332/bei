@@ -53,16 +53,16 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         HashMap::from([
             (
                 0,
-                Window::new(0, "Bei Window".to_string(), (100, 100), true, (50, 50)),
+                Window::new(0, "BeiOS v0.1.0".to_string(), (250, 200), true, (25, 25)),
             ),
             (
                 1,
                 Window::new(
                     1,
                     "Another window".to_string(),
-                    (150, 100),
+                    (280, 175),
                     false,
-                    (170, 50),
+                    (290, 70),
                 ),
             ),
         ]),
