@@ -9,22 +9,17 @@
 mod tests;
 extern crate alloc;
 
-use alloc::{string::ToString, sync::Arc};
 use bei_kernel::{
     allocator,
-    drawing::draw_and_paint,
     executor::Executor,
     gdt, interrupts,
     keyboard::detect_keypresses,
     memory::{self, BootInfoFrameAllocator},
     println,
     task::Task,
-    windowing::{Window, WindowManager},
 };
 
 use bootloader::{entry_point, BootInfo};
-use hashbrown::HashMap;
-use spin::Mutex;
 use x86_64::VirtAddr;
 
 entry_point!(kernel_main);
@@ -48,32 +43,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     println!("[Success] Started bei.");
 
-    let window_manager = WindowManager::new(
-        Some(0),
-        HashMap::from([
-            (
-                0,
-                Window::new(0, "BeiOS v0.1.0".to_string(), (250, 200), true, (25, 25)),
-            ),
-            (
-                1,
-                Window::new(
-                    1,
-                    "Another window".to_string(),
-                    (280, 175),
-                    false,
-                    (290, 70),
-                ),
-            ),
-        ]),
-    );
-
-    window_manager.draw();
-
-    let window_manager = Arc::new(Mutex::new(window_manager));
-
     let mut executor = Executor::new();
-    executor.spawn(Task::new(detect_keypresses(window_manager)));
-    executor.spawn(Task::new(draw_and_paint()));
+    executor.spawn(Task::new(detect_keypresses()));
     executor.run();
 }

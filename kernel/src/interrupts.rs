@@ -5,7 +5,6 @@ use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 use pic8259::ChainedPics;
 use spin;
 
-use crate::drawing::draw_tasks;
 use crate::keyboard;
 use crate::println;
 use crate::{gdt, hlt_loop};
@@ -48,8 +47,6 @@ extern "x86-interrupt" fn double_fault_handler(
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    draw_tasks();
-
     unsafe {
         PICS.lock()
             .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
