@@ -9,6 +9,7 @@
 mod tests;
 extern crate alloc;
 
+use alloc::sync::Arc;
 use bei_kernel::{
     allocator,
     executor::Executor,
@@ -16,10 +17,12 @@ use bei_kernel::{
     keyboard::detect_keypresses,
     memory::{self, BootInfoFrameAllocator},
     println,
+    shell::Shell,
     task::Task,
 };
 
 use bootloader::{entry_point, BootInfo};
+use spin::Mutex;
 use x86_64::VirtAddr;
 
 entry_point!(kernel_main);
@@ -43,7 +46,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     println!("[Success] Started bei.");
 
+    let shell = Shell::new();
+    let shell = Arc::new(Mutex::new(shell));
+
     let mut executor = Executor::new();
-    executor.spawn(Task::new(detect_keypresses()));
+    executor.spawn(Task::new(detect_keypresses(shell)));
     executor.run();
 }

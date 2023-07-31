@@ -118,6 +118,11 @@ impl Writer {
             self.buffer.chars[row][col].write(blank);
         }
     }
+
+    fn remove_row(&mut self, row: usize) {
+        self.column_position = 0;
+        self.clear_row(row);
+    }
 }
 
 impl fmt::Write for Writer {
@@ -151,5 +156,23 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     interrupts::without_interrupts(|| {
         WRITER.lock().write_fmt(args).unwrap();
+    });
+}
+
+#[doc(hidden)]
+pub fn _clear() {
+    interrupts::without_interrupts(|| {
+        let row = BUFFER_HEIGHT - 1;
+        WRITER.lock().remove_row(row);
+    });
+}
+
+#[doc(hidden)]
+pub fn _clear_all() {
+    interrupts::without_interrupts(|| {
+        for row in 0..BUFFER_HEIGHT - 1 {
+            WRITER.lock().remove_row(row);
+        }
+        WRITER.lock().column_position = 0;
     });
 }

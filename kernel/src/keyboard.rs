@@ -1,9 +1,11 @@
+use alloc::sync::Arc;
 use conquer_once::spin::OnceCell;
 use crossbeam_queue::ArrayQueue;
 use futures_util::stream::StreamExt;
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+use spin::Mutex;
 
-use crate::println;
+use crate::{println, shell::Shell};
 
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
 
@@ -75,7 +77,7 @@ impl Stream for ScancodeStream {
     }
 }
 
-pub async fn detect_keypresses() {
+pub async fn detect_keypresses(shell: Arc<Mutex<Shell>>) {
     let mut scancodes = ScancodeStream::new();
     let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
 
@@ -83,9 +85,11 @@ pub async fn detect_keypresses() {
         if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
             if let Some(key) = keyboard.process_keyevent(key_event) {
                 match key {
-                    DecodedKey::Unicode(character) => println!("{}", character),
+                    DecodedKey::Unicode(character) => {
+                        shell.lock().press_char(character);
+                    }
                     DecodedKey::RawKey(key) => {
-                        println!(">>{:?}", key);
+                        shell.lock().press_rawkey(key);
                     }
                 }
             }

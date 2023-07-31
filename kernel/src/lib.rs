@@ -11,6 +11,7 @@ pub mod keyboard;
 pub mod memory;
 pub mod panic;
 pub mod serial;
+pub mod shell;
 pub mod task;
 pub mod test_runner;
 pub mod vga;
