@@ -1,16 +1,15 @@
 # bei - a toy OS 🦀
 
-Bei is a work-in-progress OS written in Rust 🦀. It was made thanks to [Philipp Oppermann's blog](https://os.phil-opp.com/).
+Bei is a **toy OS** written in Rust 🦀. Made by following [Philipp Oppermann's blog](https://os.phil-opp.com/).
 
-Run:
-```shell
+![bei](./demo.png)
+
+### Usage
+```
+rustup component add llvm-tools-preview
+cargo install bootimage
+cargo build
+cargo bootimage
+cargo test --package bei
 cargo run
 ```
-
---- 
-- cargo install bootimage
-- cargo build
-- cargo bootimage
-- qemu-system-x86_64 -drive format=raw,file=target/x86_64-bei/debug/bootimage-bei.bin
-- cargo test --package bei
-- cargo run
