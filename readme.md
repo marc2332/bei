@@ -6,6 +6,7 @@ Bei is a **toy OS** written in Rust 🦀. Made by following [Philipp Oppermann's
 
 ### Usage
 ```
+# Install QEMU
 rustup component add llvm-tools-preview
 cargo install bootimage
 cargo build
